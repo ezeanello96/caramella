@@ -1,0 +1,594 @@
+.resaltado{
+    font-weight:bold;
+    }
+.centradodiv{
+    padding-left:15%;
+    }
+.centrar{
+    text-align: center;}
+.centrado{
+    text-align: right;
+    }
+.logincentrado{
+    margin-top:20%;
+    margin-bottom: 35%;
+}
+
+.boton-inicio{
+    color: #fff;
+    background-color: #006700;
+    height:200px;
+    margin-top:5%;
+    border-radius: 15px;
+    box-shadow: 5px 5px 3px #DEDEDE;
+    -webkit-transition: all 0.2s ease-in-out;
+    -moz-transition: all 0.2s ease-in-out;
+    -o-transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out;
+    text-align: center;
+    }
+
+.boton-inicio:hover{
+    box-shadow: 10px 10px 7px #DEDEDE;
+    background-color:#1F5B1F;
+    }
+.boton-inicio:active{
+    background-color:rgb(100, 144, 11);
+    }
+.boton-inicio h1{
+    margin-top: 70px;
+    }
+
+
+.informacion-alumno{
+    background-color: #F2F2F2;
+    border-radius: 15px;
+    line-height: 1;
+    }
+
+.informacion-profesores{
+    background-color: #F2F2F2;
+    border-radius: 15px;
+}
+.btn-azul {
+    color: #fff;
+    background-color: #0000FF;
+    border-color: #5067FF;
+}
+
+.btn-success {
+    color: #fff;
+    background-color: #006700;
+    border-color: #4cae4c;
+}
+/* table {
+    counter-reset: rowNumber;
+}
+
+table tbody tr {
+    counter-increment: rowNumber;
+}
+
+table tbody td:first-child::before {
+    content: counter(rowNumber);
+    min-width: 1em;
+    margin-right: 0.5em;
+}
+*/
+tbody #tablaProfes {
+    overflow-y: auto;
+    display: block;
+    }
+wrapper-bajado{
+    margin-top: 50px;
+    }
+.alerta:hover,
+.alerta:focus {
+	
+	background:rgba(219, 68, 55, 0.56) !important;
+	outline:0;
+}
+.centrarBtn{
+    margin-top:0px !important;}
+.logo-senam{
+    height:15px;
+    margin-bottom: 5px;}
+/*==============================================
+    GENERAL  STYLES    
+    =============================================*/
+body {
+    font-family: 'Open Sans', sans-serif;
+}
+
+ #wrapper {
+    width: 100%;
+    background:#202020;
+}
+
+#page-wrapper {
+    padding: 15px 15px;
+    min-height: 600px;
+    background:#F3F3F3;
+   
+}
+#page-inner {
+    width:100%;
+		height:auto;
+		border-radius: 20px;
+}
+#page-inner-cuerpo {
+    max-height: 100%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    background-color:#fff!important;
+    padding:10px;
+    margin-top:1%;
+	border-radius: 20px;
+}
+.text-center {
+    text-align:center;
+}
+.verticalcenter{
+    vertical-align: middle;
+    margin-top: 50%;
+    position: absolute;
+}
+.no-boder {
+    border:1px solid #f3f3f3;
+}
+h2 {
+    color: #697DFF;
+}
+h4 {
+    padding-top:10px;
+}
+.square-btn-adjust {
+    border: 0px solid transparent; 
+   -webkit-border-radius: 0px;
+-moz-border-radius: 0px;
+border-radius: 0px;
+
+}
+p {
+    font-size:16px;
+    line-height:25px;
+    padding-top:20px;
+}
+.panel-back {
+    background-color:#F8F8F8;
+
+}
+   .noti-box {
+min-height: 100px;
+padding: 20px;
+}
+
+    .noti-box .icon-box {
+display: block;
+float: left;
+margin: 0 15px 10px 0;
+width: 70px;
+height: 70px;
+line-height: 75px;
+vertical-align: middle;
+text-align: center;
+font-size: 40px;
+}
+.text-box p{
+    margin: 0 0 3px;
+}
+.main-text {
+    font-size: 25px;
+    font-weight:600;
+}
+.set-icon {
+    -webkit-border-radius: 50px;
+-moz-border-radius: 50px;
+border-radius: 50px;
+
+}
+    .bg-color-green {
+background-color: #00CE6F;
+color: #fff;
+}
+ .bg-color-blue {
+background-color: #A95DF0;
+color: #fff;
+}
+  .bg-color-red {
+background-color: #DB0630;
+color: #fff;
+}
+  .bg-color-brown {
+background-color: #B94A00;
+color: #fff;
+}
+
+
+ .icon-box-right {
+display: block;
+float: right;
+margin: 0 15px 10px 0;
+width: 70px;
+height: 70px;
+line-height: 75px;
+vertical-align: middle;
+text-align: center;
+font-size: 40px;
+}
+
+ .main-temp-back {
+background: #8702A8;
+color: #FFFFFF;
+font-size: 16px;
+font-weight: 300;
+text-align: center;
+}
+ .main-temp-back .text-temp {
+font-size: 40px;
+}
+.back-dash {
+    padding:20px;
+    font-size:20px;
+    font-weight:500;
+      -webkit-border-radius: 0px;
+-moz-border-radius: 0px;
+border-radius: 0px;
+background-color:#2EA7EB;
+color:#fff;
+}
+    .back-dash p {
+        padding-top:16px;
+        font-size:13px;
+        color:#fff;
+        line-height:25px;
+        text-align:justify;
+    }
+    .back-footer-green {
+    background-color: #009B50;
+    border-top: 0px solid #fff;
+}
+     .back-footer-red {
+    background-color: #AF0000;
+    border-top: 0px solid #fff;
+}
+     .color-bottom-txt {
+   color: #000;
+font-size: 16px;
+line-height: 30px;
+}
+     /*CHAT PANEL*/
+ .chat-panel .panel-body {
+height: 450px;
+overflow-y: scroll;
+}
+ .chat-box {
+margin: 0;
+padding: 0;
+list-style: none;
+}
+ .chat-box li {
+margin-bottom: 15px;
+padding-bottom: 5px;
+border-bottom: 1px dotted #808080;
+}
+ .chat-box li.left .chat-body {
+margin-left: 90px;
+}
+ .chat-box li .chat-body p {
+margin: 0;
+color: #8d8888;
+}
+.chat-img>img {
+    margin-left:20px;
+}
+
+/*==============================================
+    MENU STYLES    
+    =============================================*/
+
+
+.user-image {
+    margin: 25px auto;
+-webkit-border-radius: 10px;
+-moz-border-radius: 10px;
+border-radius: 10px;
+max-height:170px;
+max-width:170px;
+    
+}
+
+#centrado{
+    margin-left: 41%;
+}
+
+.navbar-cls-top .navbar-brand {
+	color: #fff;
+    padding: 0px;
+    background: #A4A4A4;
+    width: 260px;
+    text-align: center;
+    height: 13.1%;
+    font-size: 30px;
+    font-weight: 700;
+}
+.active-menu {
+    background-color:#5067FF!important;
+}
+
+.arrow {
+    float: right;
+}
+
+.fa.arrow:before {
+    content: "\f104";
+}
+
+.active > a > .fa.arrow:before {
+    content: "\f107";
+}
+
+
+.nav-second-level li,
+.nav-third-level li {
+    border-bottom: none !important;
+}
+
+.nav-second-level li a {
+    padding-left: 37px;
+}
+
+.nav-third-level li a {
+    padding-left: 55px;
+}
+.sidebar-collapse , .sidebar-collapse .nav{
+	background:none;
+    margin-to
+	p: 1.4%;
+    width: 100%;
+    /*height: 100%; */
+}
+
+#sub-footer{
+margin-top:70%;
+font-size: 10px;
+text-align:center;
+color:rgba(255, 255, 255, 0.26); 
+}
+
+.sidebar-collapse .nav {
+	padding:0;
+}
+.sidebar-collapse .nav > li > a {
+	color:#fff;
+	text-shadow:none;
+	
+}
+.sidebar-collapse > .nav > li > a {
+	padding:15px 10px;
+}
+.sidebar-collapse > .nav > li {
+	border-bottom: 1px solid rgba(107, 108, 109, 0.19);
+}
+.sidebar-collapse .nav > li > a:hover,
+.sidebar-collapse .nav > li > a:focus {
+	
+	background:#405AFF;
+	outline:0;
+}
+
+.nav-second-level > li > a:before ,
+.nav-third-level > li > a:before {
+	content:"";
+	display:block;
+	position:absolute;
+	left:20px;
+	width:15px;
+	height:1px;
+	background:#ff0000;
+	top:20px;
+}
+.nav-second-level > li > a:after,
+.nav-third-level > li > a:after {
+	content:"";
+	display:block;
+	position:absolute;
+	left:20px;
+	width:1px;
+	height:100%;
+	background:#ff0000;
+	top:0px;
+	z-index:10;
+}
+.nav-second-level  > li:last-child > a:after,
+.nav-third-level  > li:last-child > a:after {
+	height:50%;
+}
+.nav-third-level > li > a:after,
+.nav-third-level > li > a:before  {
+	left:40px;
+}
+.navbar-cls-top {
+	background:#4D4D4D;
+	border-bottom:none;
+	
+}
+
+#hola{
+    height: 90px;
+}
+.navbar-cls-top .navbar-brand:hover {
+    background: #D8D8D8;
+    color:#fff;
+}
+
+.navbar-default {
+    border:0px solid black;
+     
+}
+.navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
+background-color: #B40101;
+}
+.navbar-default .navbar-toggle {
+border-color: #fff;
+}
+
+.navbar-default .navbar-toggle .icon-bar {
+background-color: #FFF;
+}
+.nav > li > a > i {
+    margin-right:10px;
+}
+/*==============================================
+    UI ELEMENTS STYLES     
+    =============================================*/
+.btn-circle {
+width: 50px;
+height: 50px;
+padding: 6px 0;
+text-align: center;
+font-size: 12px;
+line-height: 1.428571429;
+}
+
+/*==============================================
+    MEDIA QUERIES     
+    =============================================*/
+ 
+ @media(min-width:768px) {
+     #page-wrapper{
+	margin-left:14.7%;
+        padding: 15px 30px;
+		
+    }
+	
+	
+    .navbar-side {
+        z-index: 1;
+        position: fixed;
+        width: 14.7%;
+        height: 100%;
+    }
+
+   .navbar {
+ border-radius: 0px;
+}
+   
+}
+
+.cd-main-header {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  height: 45px;
+  width: 100%;
+  background: #3e454c;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.cd-main-header::after {
+  clear: both;
+  content: "";
+  display: table;
+}
+@media only screen and (min-width: 768px) {
+  .cd-main-header {
+    position: fixed;
+    height: 55px;
+  }
+}
+
+.dropdown-menu {
+    width: 100%;
+}
+.dropdown-menu > li > a {
+    height: 30px;
+}
+#archivo {
+    max-height: 100%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    background-color:#fff!important;
+    padding:10px;
+    margin-top:4%;
+    margin-right: 2%;
+    margin-left: 5%;
+	border-radius: 20px;
+}
+#archivo-add {
+    max-height: 100%;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    color: #fff;
+    background-color: #006700;
+    border-color: #4cae4c;
+    padding:10px;
+    margin-top:4%;
+    margin-right: 2%;
+    margin-left: 5%;
+	border-radius: 20px;
+    text-align: center;
+}
+#archivo-add:hover {
+    border-color: #000;
+    background-color: #4cae4c;
+}
+ul.tab {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f1f1f1;
+}
+
+/* Float the list items side by side */
+ul.tab li {float: left;}
+
+/* Style the links inside the list items */
+ul.tab li a {
+    display: inline-block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of links on hover */
+ul.tab li a:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+ul.tab li a:focus, .active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+    border-radius: 10px;
+}
+.requerido {
+    background-color: rgba(0,255,0,0.3)!important;
+}
+.principal {
+    background-color: #71CFF5; 
+    border-radius: 15px;
+    height: 85%;
+}
+.secundario {
+    background-color: #9AE1FF; 
+    border-radius: 15px;
+    height: 85%;
+    margin-top: 30px;
+    margin-bottom: 3%;
+}
