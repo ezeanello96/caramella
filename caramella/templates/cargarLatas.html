@@ -2,13 +2,40 @@
 <body>
     <div class="col-lg-2"></div>
     <div id="AddClientes" class="col-lg-9 principal">
+        <div class="col-lg-6" style="margin-top: 20px; overflow-y: scroll; height: 95%;">
+            <h4>Dulce de leche:</h4>
+            <div class="gusto" onclick="select(this);">DDL tentacion</div>
+            <div class="gusto" onclick="select(this);">DDL granizado</div>
+        </div>
         <div class="col-lg-6" style="margin-top: 20px;">
-            <input id="peso" type="text" class="form-control" disabled>
-            <btn class="btn btn-success" onclick="obtenerPeso();">Obtener peso</btn>
+            <div class="input-group">
+                <input id="peso" type="text" class="form-control" disabled>
+                <span class="input-group-addon" id="basic-addon2">Kgs.</span>
+                <span class="input-group-btn">
+                    <btn class="btn btn-primary" onclick="obtenerPeso();">Obtener peso</btn>
+                </span>
+            </div>
         </div>
     </div>
 </body>
 <script>
+    var div;
+    function select(algo) {
+        if(div){
+            if(div == algo){
+                $(div).removeClass("activo");
+                div = '';
+            }else{
+                $(div).removeClass("activo");
+                $(algo).addClass("activo");
+                div = algo
+            }
+        }else{
+            $(algo).addClass("activo");
+            div = algo;
+        }
+    }
+    
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -24,10 +51,10 @@
         }
         return cookieValue;
     }
-    
+
     function obtenerPeso(){
         var csrftoken = getCookie('csrftoken');
-        
+
         $.ajax({
             url : '/cargarLatas/', // the endpoint,commonly same url
             type : "POST", // http method
@@ -39,7 +66,11 @@
             success : function(json) {
                 //console.log(json); // another sanity check
                 //On success show the data posted to server as a message
-                $('#peso').val(json['peso']);
+                if(json['error']){
+                    alert(json['error']);
+                }else{
+                    $('#peso').val(json['peso']);
+                }
             },
 
             // handle a non-successful response

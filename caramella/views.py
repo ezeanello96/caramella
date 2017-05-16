@@ -14,6 +14,13 @@ def index(request):
     return render_to_response('index.html', RequestContext(request))
 
 def cargarLatas(request):
+    grupos = Grupo.objects.all()
+    gru_gus = []
+    for i in range(len(grupos)):
+        gustos = Gusto.objects.filter(grupo = grupos[i])
+        agregar = [grupos[i],gustos]
+        gru_gus.append(agregar)
+    print gru_gus
     if request.is_ajax():
         if "peso" in request.POST:
             try:
@@ -25,23 +32,26 @@ def cargarLatas(request):
                 ser.stopbits = serial.STOPBITS_ONE
                 ser.open()
                 print(ser.name)         # check which port was really used
-                ser.write(b'\x05')     # write a string
-                peso = ''
-                for i in range(7):
-                    out = ser.read()
-                    print out
-                    if i==0 or i==8:
-                        peso = peso
-                    elif i==3:
-                        peso = peso+out+"."
-                    else:
-                        peso = peso+out
-                peso = float(peso)
-                print peso
-                ser.close()
-                return JsonResponse({'peso':str(peso)})
+                try:
+                    ser.write(b'\x05')     # write a string
+                    peso = ''
+                    for i in range(7):
+                        out = ser.read()
+                        print out
+                        if i==0 or i==8:
+                            peso = peso
+                        elif i==3:
+                            peso = peso+out+"."
+                        else:
+                            peso = peso+out
+                    peso = float(peso)
+                    print peso
+                    ser.close()
+                    return JsonResponse({'peso':str(peso)})
+                except:
+                    return JsonResponse({'error':"Espere a que el peso se estabilice sobre la balanza"})
             except:
-                return JsonResponse({'peso':"Estabilice el peso sobre la balanza"})
+                return JsonResponse({'error':"Compruebe la conexión de la balanza"})
     return render_to_response('cargarLatas.html', RequestContext(request))
 
 def remito(request):
