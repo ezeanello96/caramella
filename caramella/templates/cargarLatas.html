@@ -1,1 +1,51 @@
 {% include 'nav.html' %}
+<body>
+    <div class="col-lg-2"></div>
+    <div id="AddClientes" class="col-lg-9 principal">
+        <div class="col-lg-6" style="margin-top: 20px;">
+            <input id="peso" type="text" class="form-control" disabled>
+            <btn class="btn btn-success" onclick="obtenerPeso();">Obtener peso</btn>
+        </div>
+    </div>
+</body>
+<script>
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function obtenerPeso(){
+        var csrftoken = getCookie('csrftoken');
+        
+        $.ajax({
+            url : '/cargarLatas/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken, 
+                    peso : "Obtener peso",
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                $('#peso').val(json['peso']);
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    }
+</script>
