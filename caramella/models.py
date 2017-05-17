@@ -23,7 +23,7 @@ class Gusto(models.Model):
         ordering = ("grupo","nombre",)
         
     def __unicode__(self):
-        return self.grupo + " - " + self.nombre
+        return self.grupo.nombre + " - " + self.nombre
     
 class Cliente(models.Model):
     razon_social = models.CharField("Razon Social", max_length=50)

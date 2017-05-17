@@ -20,7 +20,7 @@ def cargarLatas(request):
         gustos = Gusto.objects.filter(grupo = grupos[i])
         agregar = [grupos[i],gustos]
         gru_gus.append(agregar)
-    print gru_gus
+    fecha = time.strftime("%d/%m/%Y")
     if request.is_ajax():
         if "peso" in request.POST:
             try:
@@ -52,7 +52,7 @@ def cargarLatas(request):
                     return JsonResponse({'error':"Espere a que el peso se estabilice sobre la balanza"})
             except:
                 return JsonResponse({'error':"Compruebe la conexión de la balanza"})
-    return render_to_response('cargarLatas.html', RequestContext(request))
+    return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha}, RequestContext(request))
 
 def remito(request):
     return render_to_response('Remito.html', RequestContext(request))

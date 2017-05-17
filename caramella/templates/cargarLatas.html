@@ -3,18 +3,29 @@
     <div class="col-lg-2"></div>
     <div id="AddClientes" class="col-lg-9 principal">
         <div class="col-lg-6" style="margin-top: 20px; overflow-y: scroll; height: 95%;">
-            <h4>Dulce de leche:</h4>
-            <div class="gusto" onclick="select(this);">DDL tentacion</div>
-            <div class="gusto" onclick="select(this);">DDL granizado</div>
+            {% for grupo, gustos in grupos %}
+            <h4>{{ grupo.nombre }}:</h4>
+            {% for gusto in gustos %}
+            <div class="gusto" onclick="select(this);" id="{{ gusto.id }}">{{ gusto.nombre }}</div>
+            {% endfor %}
+            {% endfor %}
         </div>
         <div class="col-lg-6" style="margin-top: 20px;">
-            <div class="input-group">
+            <h4 id="sabor"></h4>
+            <label>Fecha de elaboración:</label>
+            <input type="text" id="fecha" class="form-control" disabled style="margin: 10px 0px 10px 0px;" value="{{ fecha }}">
+            <label>Lote:</label>
+            <input type="text" class="form-control" style="margin: 10px 0px 10px 0px;" value="0001">
+            <div style="margin-top: 15px;" class="input-group">
                 <input id="peso" type="text" class="form-control" disabled>
                 <span class="input-group-addon" id="basic-addon2">Kgs.</span>
                 <span class="input-group-btn">
                     <btn class="btn btn-primary" onclick="obtenerPeso();">Obtener peso</btn>
                 </span>
             </div>
+            <label style="margin-top: 10px;">Código de barras:</label>
+            <input type="text" class="form-control" style="margin: 10px 0px 10px 0px;" disabled value="000938816739">
+            <div id="codigo"></div>
         </div>
     </div>
 </body>
@@ -34,6 +45,7 @@
             $(algo).addClass("activo");
             div = algo;
         }
+        $('#sabor').text("El gusto elegio es: "+$(div).text());
     }
     
     function getCookie(name) {
