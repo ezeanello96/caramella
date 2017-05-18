@@ -49,9 +49,9 @@ def cargarLatas(request):
                     ser.close()
                     return JsonResponse({'peso':str(peso)})
                 except:
-                    return JsonResponse({'error':"Espere a que el peso se estabilice sobre la balanza"})
+                    return JsonResponse({'titulo':"Espere...",'error':"Espere a que el peso se estabilice sobre la balanza."})
             except:
-                return JsonResponse({'error':"Compruebe la conexión de la balanza"})
+                return JsonResponse({'titulo':"Error de conexión",'error':"Compruebe que la balanza este encendida y que el cable USB este bien conectado."})
     return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha}, RequestContext(request))
 
 def remito(request):

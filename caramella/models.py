@@ -47,7 +47,6 @@ class Lata(models.Model):
     codigo = models.CharField("Codigo de barras", unique=True, max_length=255)
     gusto = models.ForeignKey(Gusto)
     lote = models.CharField("Lote", max_length=20)
-    numero = models.IntegerField("Numero de producto")
     fecha_elab = models.DateField("Fecha de elaboración")
     en_stock = models.BooleanField(True)
     

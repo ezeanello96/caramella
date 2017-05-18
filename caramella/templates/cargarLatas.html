@@ -1,4 +1,20 @@
 {% include 'nav.html' %}
+<div id="myModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="titulo-modal"></h4>
+            </div>
+            <div class="modal-body">
+                <p id="texto-modal"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
 <body>
     <div class="col-lg-2"></div>
     <div id="AddClientes" class="col-lg-9 principal">
@@ -79,7 +95,9 @@
                 //console.log(json); // another sanity check
                 //On success show the data posted to server as a message
                 if(json['error']){
-                    alert(json['error']);
+                    $('#titulo-modal').text(json['titulo']);
+                    $('#texto-modal').text(json['error']);
+                    $("#myModal").modal('show');
                 }else{
                     $('#peso').val(json['peso']);
                 }
