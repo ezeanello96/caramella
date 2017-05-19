@@ -613,3 +613,15 @@ ul.tab li a:focus, .active {
     box-shadow: 2px 2px 10px #000;
     color: #fff;
 }
+
+.imprimir {
+    margin-left: 12%;
+    margin-top: 8%;
+    width: 80%;
+    height: 25%;
+    text-align: center;
+    font-size: 16pt;
+    vertical-align: middle;
+    font-weight: 700;
+    padding: 50px 0;
+}

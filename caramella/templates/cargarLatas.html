@@ -31,7 +31,7 @@
             <label>Fecha de elaboración:</label>
             <input type="text" id="fecha" class="form-control" disabled style="margin: 10px 0px 10px 0px;" value="{{ fecha }}">
             <label>Lote:</label>
-            <input type="text" class="form-control" style="margin: 10px 0px 10px 0px;" value="0001">
+            <input id="lote" type="text" class="form-control" style="margin: 10px 0px 10px 0px;" value="0001" onchange="generarCod();">
             <div style="margin-top: 15px;" class="input-group">
                 <input id="peso" type="text" class="form-control" disabled>
                 <span class="input-group-addon" id="basic-addon2">Kgs.</span>
@@ -40,8 +40,8 @@
                 </span>
             </div>
             <label style="margin-top: 10px;">Código de barras:</label>
-            <input type="text" class="form-control" style="margin: 10px 0px 10px 0px;" disabled value="000938816739">
-            <div id="codigo"></div>
+            <input type="text" id="codigo" class="form-control" style="margin: 10px 0px 10px 0px;" disabled value="000938816739">
+            <btn class="btn btn-success imprimir">Guardar e imprimir etiqueta</btn>
         </div>
     </div>
 </body>
@@ -61,6 +61,7 @@
             $(algo).addClass("activo");
             div = algo;
         }
+        generarCod();
         $('#sabor').text("El gusto elegio es: "+$(div).text());
     }
     
@@ -108,5 +109,19 @@
                 console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
             }
         });
+    }
+    
+    function generarCod(){
+        var lote = $('#lote').val();
+        if(div != '' && lote != ''){
+            var gusto = $(div).attr('id');
+            var fecha = $('#fecha').val();
+            fecha = fecha[0]+fecha[1]+fecha[3]+fecha[4]+fecha[6]+fecha[7]+fecha[8]+fecha[9];
+            $('#codigo').val(lote+gusto+fecha);
+        }else{}
+    }
+    
+    function guardar(){
+        
     }
 </script>
