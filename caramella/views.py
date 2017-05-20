@@ -6,9 +6,12 @@ from django.contrib.auth import logout, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from models import *
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 import datetime
 import time
 import serial
+import base64
 
 def index(request):
     return render_to_response('index.html', RequestContext(request))
@@ -28,14 +31,10 @@ def cargarLatas(request):
         pass
     if request.is_ajax():
         if "imprimir" in request.POST:
-            print "Entre a la funcion"
             try:
-                print "Entre a la funcion"
-                img_data = request.POST.get('imagen')
-                fh = open("etiqueta.svg", "wb")
-                fh.write(img_data.decode('base64'))
-                print "Entre a la funcion"
-                fh.close()
+                img_data = b''+request.POST.get('imagen')
+                img_data = base64.b64decode(img_data)
+                path = default_storage.save('etiqueta.png', ContentFile(img_data))
             except:
                 return JsonResponse({'titulo':"Error creando imagen",'error':"Hubo un error creando la imagen"})
         if "obtenerPeso" in request.POST:

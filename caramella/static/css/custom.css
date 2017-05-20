@@ -628,8 +628,8 @@ ul.tab li a:focus, .active {
 
 .etiqueta{
     display: none;
-    width: 440px;
-    height: 230px;
+    width: 100px;
+    height: 100px;
     background-color: #fff;
     padding: 25px 0 10px 10px;
 }
