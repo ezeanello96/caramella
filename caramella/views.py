@@ -21,8 +21,24 @@ def cargarLatas(request):
         agregar = [grupos[i],gustos]
         gru_gus.append(agregar)
     fecha = time.strftime("%d/%m/%Y")
+    ultimo_id = 0
+    try:
+        ultimo_id = Lata.objects.latest('id')
+    except:
+        pass
     if request.is_ajax():
-        if "peso" in request.POST:
+        if "imprimir" in request.POST:
+            print "Entre a la funcion"
+            try:
+                print "Entre a la funcion"
+                img_data = request.POST.get('imagen')
+                fh = open("etiqueta.svg", "wb")
+                fh.write(img_data.decode('base64'))
+                print "Entre a la funcion"
+                fh.close()
+            except:
+                return JsonResponse({'titulo':"Error creando imagen",'error':"Hubo un error creando la imagen"})
+        if "obtenerPeso" in request.POST:
             try:
                 ser = serial.Serial()  # open serial port
                 ser.port = '/dev/ttyUSB0'
@@ -52,7 +68,7 @@ def cargarLatas(request):
                     return JsonResponse({'titulo':"Espere...",'error':"Espere a que el peso se estabilice sobre la balanza."})
             except:
                 return JsonResponse({'titulo':"Error de conexión",'error':"Compruebe que la balanza este encendida y que el cable USB este bien conectado."})
-    return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha}, RequestContext(request))
+    return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha, 'ultimo_id':ultimo_id}, RequestContext(request))
 
 def remito(request):
     return render_to_response('Remito.html', RequestContext(request))

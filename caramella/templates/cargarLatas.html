@@ -40,10 +40,23 @@
                 </span>
             </div>
             <label style="margin-top: 10px;">Código de barras:</label>
-            <input type="text" id="codigo" class="form-control" style="margin: 10px 0px 10px 0px;" disabled value="000938816739">
-            <btn class="btn btn-success imprimir">Guardar e imprimir etiqueta</btn>
+            <input type="text" id="codigo" class="form-control" style="margin: 10px 0px 10px 0px;" disabled value="Aqui aparecera el codigo...">
+
+            <btn class="btn btn-success imprimir" onclick="guardar();">Guardar e imprimir etiqueta</btn>
         </div>
     </div>
+    <div class="col-lg-12 etiqueta" id="etiqueta">
+        <div class="col-lg-6">
+            <label id="label_lote">Lote:</label><br>
+            <label id="label_gusto">Gusto:</label>
+        </div>
+        <div class="col-lg-6">
+            <label id="label_peso">Peso:</label><br>
+            <label id="label_fecha">Fecha:</label>
+        </div>
+        <img style="margin-top:25px;" id="barcode"/>
+    </div>
+    <div style="display:none;" id="base64"></div>
 </body>
 <script>
     var div;
@@ -64,7 +77,7 @@
         generarCod();
         $('#sabor').text("El gusto elegio es: "+$(div).text());
     }
-    
+
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -88,7 +101,7 @@
             url : '/cargarLatas/', // the endpoint,commonly same url
             type : "POST", // http method
             data : { csrfmiddlewaretoken : csrftoken, 
-                    peso : "Obtener peso",
+                    obtenerPeso : "Obtener peso",
                    }, // data sent with the post request
 
             // handle a successful response
@@ -110,18 +123,78 @@
             }
         });
     }
-    
+
     function generarCod(){
         var lote = $('#lote').val();
         if(div != '' && lote != ''){
             var gusto = $(div).attr('id');
             var fecha = $('#fecha').val();
             fecha = fecha[0]+fecha[1]+fecha[3]+fecha[4]+fecha[6]+fecha[7]+fecha[8]+fecha[9];
-            $('#codigo').val(lote+gusto+fecha);
+            $('#codigo').val(lote+'{{ ultimo_id }}'+gusto+fecha);
         }else{}
     }
-    
+
     function guardar(){
-        
+        if($('#codigo').val() != 'Aqui aparecera el codigo...' /*&& $('#peso').val() != '' Descomentar esto para que cuando no carguen el peso no funcione*/){
+            JsBarcode("#barcode", $('#codigo').val(), {
+                format: "code39",
+                lineColor: "#000",
+                width:1.5,
+                height:80,
+                displayValue: true
+            });
+            $('#label_fecha').text('Fecha: '+$('#fecha').val());
+            $('#label_gusto').text('Gusto: '+$(div).text());
+            $('#label_lote').text('Lote: '+$('#lote').val());
+            $('#label_peso').text('Peso: '+$('#peso').val());
+            $('#etiqueta').show();
+            html2canvas(document.getElementById('etiqueta'), {
+                onrendered: function(canvas) {
+                    //document.body.appendChild(canvas);
+                    $('#base64').text(canvas.toDataURL().split(',')[1]);
+                    $('#etiqueta').hide();
+                }
+            });
+            var csrftoken = getCookie('csrftoken');
+            $.ajax({
+                url : '/cargarLatas/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken,
+                        imprimir : "Imprimir etiqueta",
+                        imagen : $('#base64').text(),
+                        peso : $('#peso').val(),
+                        lote : $('#lote').val(),
+                        gusto : $(div).attr('id'),
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    if(json['error']){
+                        $('#titulo-modal').text(json['titulo']);
+                        $('#texto-modal').text(json['error']);
+                        $("#myModal").modal('show');
+                    }else{
+                        $('#peso').val(json['peso']);
+                    }
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }else{
+            if($('#codigo').val() == 'Aqui aparecera el codigo...'){
+                $('#titulo-modal').text("Error generando código de barras");
+                $('#texto-modal').text("Por favor seleccione un gusto de helado para la lata...");
+                $("#myModal").modal('show');
+            }else{
+                $('#titulo-modal').text("Error generando código de barras");
+                $('#texto-modal').text("Por favor cargue el peso de la lata poniendo la lata sobre la balanza y haciendo click en 'Obtener peso'");
+                $("#myModal").modal('show');
+            }
+        }
     }
 </script>

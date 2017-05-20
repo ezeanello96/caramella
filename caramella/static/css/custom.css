@@ -625,3 +625,11 @@ ul.tab li a:focus, .active {
     font-weight: 700;
     padding: 50px 0;
 }
+
+.etiqueta{
+    display: none;
+    width: 440px;
+    height: 230px;
+    background-color: #fff;
+    padding: 25px 0 10px 10px;
+}
