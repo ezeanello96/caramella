@@ -60,7 +60,6 @@
 <script>
     var div;
     var ultimo_id = {{ ultimo_id }};
-    alert(ultimo_id);
     function select(algo) {
         if(div){
             if(div == algo){
@@ -136,7 +135,7 @@
     }
 
     function guardar(){
-        if($('#codigo').val() != 'Aqui aparecera el codigo...' /*&& $('#peso').val() != '' Descomentar esto para que cuando no carguen el peso no funcione*/){
+        if($('#codigo').val() != 'Aqui aparecera el codigo...' && $('#peso').val() != ''){
             generarCod();
             JsBarcode("#barcode", $('#codigo').val(), {
                 format: "code39",
@@ -148,7 +147,7 @@
             $('#label_fecha').text('Fecha: '+$('#fecha').val());
             $('#label_gusto').text('Gusto: '+$(div).text());
             $('#label_lote').text('Lote: '+$('#lote').val());
-            $('#label_peso').text('Peso: '+$('#peso').val());
+            $('#label_peso').text('Peso: '+$('#peso').val()+' Kgs.');
             $('#etiqueta').show();
 
             var csrftoken = getCookie('csrftoken');
@@ -165,18 +164,20 @@
                                 peso : $('#peso').val(),
                                 lote : $('#lote').val(),
                                 gusto : $(div).attr('id'),
+                                codigo : $('#codigo').val(),
                                }, // data sent with the post request
 
                         // handle a successful response
                         success : function(json) {
                             //console.log(json); // another sanity check
                             //On success show the data posted to server as a message
-                            alert("ajax"+canvas.toDataURL().split(',')[1]);
                             if(json['ultimo_id']){
                                 $('#titulo-modal').text(json['titulo']);
                                 $('#texto-modal').text(json['error']);
                                 $("#myModal").modal('show');
                                 ultimo_id = ultimo_id+1;
+                                $('#peso').val('');
+                                $(div).removeClass('activo');
                             }else{}
                         },
 

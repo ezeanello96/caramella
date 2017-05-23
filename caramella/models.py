@@ -47,16 +47,16 @@ class Lata(models.Model):
     codigo = models.CharField("Codigo de barras", unique=True, max_length=255)
     gusto = models.ForeignKey(Gusto)
     lote = models.CharField("Lote", max_length=20)
-    fecha_elab = models.DateField("Fecha de elaboración")
-    en_stock = models.BooleanField(True)
+    fecha_elab = models.DateField("Fecha de elaboración", auto_now_add=True)
+    en_stock = models.BooleanField("En stock")
     
     class Meta:
         verbose_name = 'Lata'
         verbose_name_plural = 'Latas'
-        ordering = ("en_stock","lote","gusto",)
+        ordering = ("codigo","lote","gusto",)
         
     def __unicode__(self):
-        return self.en_stock + " - " + self.lote + " - " + self.gusto.nombre
+        return  self.codigo + " - " + str(self.fecha_elab)
 
 class Remito(models.Model):
     fecha = models.DateField("Fecha")
