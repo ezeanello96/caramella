@@ -21,7 +21,7 @@ def cargarLatas(request):
     grupos = Grupo.objects.all()
     gru_gus = []
     for i in range(len(grupos)):
-        gustos = Gusto.objects.filter(grupo = grupos[i])#Agregar aca para que solamente me muestre los gustos activos
+        gustos = Gusto.objects.filter(grupo = grupos[i], activo = True)#Agregar aca para que solamente me muestre los gustos activos
         agregar = [grupos[i],gustos]
         gru_gus.append(agregar)
     fecha = time.strftime("%d/%m/%Y")
@@ -84,7 +84,9 @@ def cargarLatas(request):
     return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha, 'ultimo_id':ultimo_id}, RequestContext(request))
 
 def remito(request):
-    return render_to_response('Remito.html', RequestContext(request))
+    clientes = Cliente.objects.all()
+    fecha = time.strftime("%d/%m/%Y")
+    return render_to_response('Remito.html', {'clientes':clientes, 'fecha':fecha}, RequestContext(request))
 
 def verStock(request):
     return render_to_response('verStock.html', RequestContext(request))
@@ -96,7 +98,7 @@ def clientes(request):
             band1 = Cliente.objects.filter(cuit = request.POST.get('cuit')).count()
             if band == 0 and band1 == 0:
                 precio = float(request.POST.get('precio'))
-                cliente = Cliente.objects.create(razon_social = request.POST.get('razon_social'), cuit = request.POST.get('cuit'), precio = precio, direccion = request.POST.get('dir'), telefono = request.POST.get('tel'), localidad = request.POST.get('local'))
+                cliente = Cliente.objects.create(razon_social = request.POST.get('razon_social'), cuit = request.POST.get('cuit'), precio = precio, direccion = request.POST.get('dir'), telefono = request.POST.get('tel'), localidad = request.POST.get('local'), activo = True)
                 cliente.save()
                 data = {'error':"EL cliente se agrego satisfactoriamente", 'cliente':{'id':cliente.id, 'razon_social':cliente.razon_social, 'cuit':cliente.cuit}}
                 return JsonResponse(data)

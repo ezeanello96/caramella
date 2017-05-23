@@ -15,6 +15,7 @@ class Grupo(models.Model):
 class Gusto(models.Model):
     nombre = models.CharField("Nombre", max_length=20)
     grupo = models.ForeignKey(Grupo)
+    activo = models.BooleanField("Gusto activo")
     #ingredientes = models.ManyToManyField(Ingrediente)
     
     class Meta:
@@ -32,6 +33,7 @@ class Cliente(models.Model):
     telefono = models.CharField("Telefono", max_length=20)
     cuit = models.CharField("CUIT", max_length=20)
     localidad = models.CharField("Localidad", max_length=20)
+    activo = models.BooleanField("Cliente activo")
     
     class Meta:
         verbose_name = 'Cliente'
