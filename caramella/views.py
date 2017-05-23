@@ -12,11 +12,13 @@ import datetime
 import time
 import serial
 import base64
+from subprocess import call
 
 def index(request):
     return render_to_response('index.html', RequestContext(request))
 
 def cargarLatas(request):
+    global anterior
     grupos = Grupo.objects.all()
     gru_gus = []
     for i in range(len(grupos)):
@@ -33,10 +35,15 @@ def cargarLatas(request):
         if "imprimir" in request.POST:
             try:
                 img_data = b''+request.POST.get('imagen')
+                print img_data
                 img_data = base64.b64decode(img_data)
                 path = default_storage.save('etiqueta.png', ContentFile(img_data))
+                print path
+                #Descomentar esto para que imprima por la impresora que esta default: try: call(["lp","media/"+path]) except: return JsonResponse({'titulo':"Error imprimiendo",'error':"Hubo un error imprimiendo la etiqueta. Asegurese de que la impresora esta bien conectada, tiene papel y si esta encendida"})
+                #Descomentar esto para despues de usar el archivo borrarlo: default_storage.delete(path)
+                return JsonResponse({'titulo':"Etiqueta impresa",'error':"La etiqueta fue impresa con exito, retirela de la impresora y peguela en la lata de helado",'ultimo_id':"+1"})
             except:
-                return JsonResponse({'titulo':"Error creando imagen",'error':"Hubo un error creando la imagen"})
+                return JsonResponse({'titulo':"Error creando etiqueta",'error':"Hubo un error creando la etiqueta"})
         if "obtenerPeso" in request.POST:
             try:
                 ser = serial.Serial()  # open serial port

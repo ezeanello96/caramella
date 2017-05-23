@@ -56,10 +56,11 @@
         </div>
         <img style="margin-top:25px;" id="barcode"/>
     </div>
-    <div style="display:none;" id="base64"></div>
 </body>
 <script>
     var div;
+    var ultimo_id = {{ ultimo_id }};
+    alert(ultimo_id);
     function select(algo) {
         if(div){
             if(div == algo){
@@ -130,12 +131,13 @@
             var gusto = $(div).attr('id');
             var fecha = $('#fecha').val();
             fecha = fecha[0]+fecha[1]+fecha[3]+fecha[4]+fecha[6]+fecha[7]+fecha[8]+fecha[9];
-            $('#codigo').val(lote+'{{ ultimo_id }}'+gusto+fecha);
+            $('#codigo').val(lote+ultimo_id+gusto+fecha);
         }else{}
     }
 
     function guardar(){
         if($('#codigo').val() != 'Aqui aparecera el codigo...' /*&& $('#peso').val() != '' Descomentar esto para que cuando no carguen el peso no funcione*/){
+            generarCod();
             JsBarcode("#barcode", $('#codigo').val(), {
                 format: "code39",
                 lineColor: "#000",
@@ -148,43 +150,46 @@
             $('#label_lote').text('Lote: '+$('#lote').val());
             $('#label_peso').text('Peso: '+$('#peso').val());
             $('#etiqueta').show();
+
+            var csrftoken = getCookie('csrftoken');
+
             html2canvas(document.getElementById('etiqueta'), {
                 onrendered: function(canvas) {
-                    //document.body.appendChild(canvas);
-                    $('#base64').text(canvas.toDataURL().split(',')[1]);
                     $('#etiqueta').hide();
+                    $.ajax({
+                        url : '/cargarLatas/', // the endpoint,commonly same url
+                        type : "POST", // http method
+                        data : { csrfmiddlewaretoken : csrftoken,
+                                imprimir : "Imprimir etiqueta",
+                                imagen : canvas.toDataURL().split(',')[1],
+                                peso : $('#peso').val(),
+                                lote : $('#lote').val(),
+                                gusto : $(div).attr('id'),
+                               }, // data sent with the post request
+
+                        // handle a successful response
+                        success : function(json) {
+                            //console.log(json); // another sanity check
+                            //On success show the data posted to server as a message
+                            alert("ajax"+canvas.toDataURL().split(',')[1]);
+                            if(json['ultimo_id']){
+                                $('#titulo-modal').text(json['titulo']);
+                                $('#texto-modal').text(json['error']);
+                                $("#myModal").modal('show');
+                                ultimo_id = ultimo_id+1;
+                            }else{}
+                        },
+
+                        // handle a non-successful response
+                        error : function(xhr,errmsg,err) {
+                            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                        }
+                    });
+
                 }
             });
-            var csrftoken = getCookie('csrftoken');
-            $.ajax({
-                url : '/cargarLatas/', // the endpoint,commonly same url
-                type : "POST", // http method
-                data : { csrfmiddlewaretoken : csrftoken,
-                        imprimir : "Imprimir etiqueta",
-                        imagen : $('#base64').text(),
-                        peso : $('#peso').val(),
-                        lote : $('#lote').val(),
-                        gusto : $(div).attr('id'),
-                       }, // data sent with the post request
 
-                // handle a successful response
-                success : function(json) {
-                    //console.log(json); // another sanity check
-                    //On success show the data posted to server as a message
-                    if(json['error']){
-                        $('#titulo-modal').text(json['titulo']);
-                        $('#texto-modal').text(json['error']);
-                        $("#myModal").modal('show');
-                    }else{
-                        $('#peso').val(json['peso']);
-                    }
-                },
 
-                // handle a non-successful response
-                error : function(xhr,errmsg,err) {
-                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
-                }
-            });
         }else{
             if($('#codigo').val() == 'Aqui aparecera el codigo...'){
                 $('#titulo-modal').text("Error generando código de barras");
