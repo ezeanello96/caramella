@@ -3,7 +3,6 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $(".select2").select2();
-        $( "#codigo" ).focus();
     });
 </script>
 <div id="myModal" class="modal fade">
@@ -22,7 +21,7 @@
         </div>
     </div>
 </div>
-<body>
+<body onbeforeunload="return salir()">
     <div class="col-lg-2"></div>
     <div id="" class="col-lg-9 principal">
         <div class="col-lg-6" style="margin-top: 20px; overflow-y: scroll; height: 95%;">
@@ -33,24 +32,11 @@
                         <th>Código</th>
                         <th>Gusto</th>
                         <th>Peso</th>
-                        <th>Opciones</th>
+                        <th>Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr id="lata1">
-                        <td>1</td>
-                        <td>0003993030</td>
-                        <td>COCO</td>
-                        <td>7.9</td>
-                        <td><btn class="btn btn-warning" onclick="verCliente({{ cliente.id }})"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCliente('{{ cliente.id }}', '{{ cliente.razon_social }}')"><i class="fa fa-times"></i></btn></td>
-                    </tr>
-                    <tr id="lata2">
-                        <td>2</td>
-                        <td>0003993030</td>
-                        <td>COCO</td>
-                        <td>7.9</td>
-                        <td><btn class="btn btn-warning" onclick="verCliente({{ cliente.id }})"><i class="fa fa-eye"></i></btn> <btn class="btn btn-danger" onclick="rmvCliente('{{ cliente.id }}', '{{ cliente.razon_social }}')"><i class="fa fa-times"></i></btn></td>
-                    </tr>
+
                 </tbody>
             </table>
         </div>
@@ -59,19 +45,38 @@
             <label>Fecha de Remito:</label>
             <input type="text" id="fecha" class="form-control" disabled style="margin: 10px 0px 10px 0px;" value="{{ fecha }}">
             <label>Cliente:</label>
-            <select class="select2 form-control" name="selectCliente">
+            <select class="select2 form-control" id="selectCliente" onchange="activar(this.value);">
                 <option value="none">Seleccione un cliente</option>
                 {% for cliente in clientes %}
                 <option value="{{ cliente.id }}">{{ cliente.razon_social }}</option>
+                <input type="hidden" value="{{ cliente.precio }}" id="precio{{ cliente.id }}">
                 {% endfor %}
             </select>
+            <label style="margin-top: 10px;">Cantidad de latas cargadas: </label><label id="cant">0</label>
             <label style="margin-top: 10px;">Código de barras (utilice el lector para escanear el código):</label>
-            <input type="text" id="codigo" class="form-control" style="margin: 10px 0px 10px 0px;" onchange="buscar(this.value);">
+            <input type="text" maxlength="20" id="codigo" class="form-control" style="margin: 10px 0px 10px 0px;" onchange="buscar(this.value);" disabled>
+            <div class="col-lg-6">
+                <label>Precio por kilo:</label>
+                <div style="margin-top: 10px;" class="input-group">
+                    <span class="input-group-addon" id="basic-addon2">$/Kg</span>
+                    <input id="precio-kg" type="text" class="form-control" disabled>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <label>Subtotal:</label>
+                <div style="margin-top: 10px;" class="input-group">
+                    <span class="input-group-addon" id="basic-addon2">$</span>
+                    <input id="subtotal" type="text" class="form-control" disabled>
+                </div>
+            </div>
             <btn class="btn btn-success imprimir" onclick="guardar();">Guardar Remito</btn>
         </div>
     </div>
 </body>
 <script>
+    var cant = 0;
+    var ids = [];
+    var subtotal = 0.0;
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -87,12 +92,23 @@
         }
         return cookieValue;
     }
-    
+
+    function activar(valor){
+        if(valor == 'none'){
+            $("#codigo").prop('disabled', true);
+        }else{
+            $("#codigo").prop('disabled', false);
+            $('#precio-kg').val($('#precio'+valor).val());
+            $( "#subtotal" ).val(subtotal);
+            $( "#codigo" ).focus();
+        }
+    }
+
     function buscar(codigo) {
         var csrftoken = getCookie('csrftoken');
-        
+
         var table = document.getElementById("latas");
-        
+
         $.ajax({
             url : '/remito/', // the endpoint,commonly same url
             type : "POST", // http method
@@ -103,27 +119,84 @@
             // handle a successful response
             success : function(json) {
                 //console.log(json); // another sanity check
-                //On success show the data posted to server as a message
+                //On success show the data posted to server as a message 
                 if(json['lata']){
-                    var row = table.insertRow(0);
-                    
-                    var cell1 = row.insertCell(0);
-                    var cell2 = row.insertCell(1);
-                    var cell3 = row.insertCell(2);
-                    var cell4 = row.insertCell(3);
-                    var cell5 = row.insertCell(4);
-                    
-                    cell1.innerHTML = json['lata'].id;
-                    cell2.innerHTML = "NEW CELL2";
-                    cell3.innerHTML = "NEW CELL1";
-                    cell4.innerHTML = "NEW CELL2";
-                    cell5.innerHTML = "NEW CELL2";
-                    
-                    $( "#codigo" ).focus();
+                    var is_lata = document.getElementById("lata"+json['lata'].id);
+                    if(is_lata == null){
+                        var row = table.insertRow(1);
+
+                        row.id = "lata"+json['lata'].id;
+                        var cell1 = row.insertCell(0);
+                        var cell2 = row.insertCell(1);
+                        var cell3 = row.insertCell(2);
+                        var cell4 = row.insertCell(3);
+                        var cell5 = row.insertCell(4);
+
+                        cell1.innerHTML = json['lata'].id;
+                        cell2.innerHTML = json['lata'].codigo;
+                        cell3.innerHTML = json['lata'].gusto;
+                        cell4.innerHTML = json['lata'].peso+" Kgs.";
+                        cell5.innerHTML = '<btn class="btn btn-danger" onclick="rmvLata('+json['lata'].id+');"><i class="fa fa-times"></i></btn>';
+                        $( "#codigo" ).val('');
+                        $( "#codigo" ).focus();
+                        cant = cant + 1;
+                        $( "#cant" ).text(cant);
+                        ids.push(json['lata'].id);
+                        var precio = parseFloat($('#precio-kg').val()) * parseFloat(json['lata'].peso);
+                        subtotal = subtotal + precio;
+                        $( "#subtotal" ).val(subtotal);
+                    }else{
+                        alert("ESTA LATA YA ESTA CARGADA EN EL REMITO, NO PUEDE CARGARLA DOS VECES");
+                        $( "#codigo" ).val('');
+                        $( "#codigo" ).focus();
+                    }
                 }else{
-                    $('#titulo-modal').text(json['titulo']);
-                    $('#texto-modal').text(json['error']);
-                    $("#myModal").modal('show');
+                    alert("EL CÓDIGO INGRESADO NO ES RECONOCIDO POR EL SISTEMA");
+                    $( "#codigo" ).val('');
+                    $( "#codigo" ).focus();
+                }
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    }
+
+    function rmvLata(id) {
+        var r = confirm("De verdad desea eliminar la lata con ID: "+id);
+
+        if (r == true) {
+            var myNode = document.getElementById("lata"+id);
+            while (myNode.firstChild) {
+                myNode.removeChild(myNode.firstChild);
+            }
+        }else{}
+    }
+
+    function salir() {
+        return "Antes de salir CANCELE o GUARDE el remito";
+    }
+
+    function guardar() {
+        var csrftoken = getCookie('csrftoken');
+        $.ajax({
+            url : '/agregar/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken, 
+                    id_cliente : $("#selectCliente").val(),
+                    latas : ids,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                alert(json['error']);
+                var myNode = document.getElementById("usuario"+id);
+                while (myNode.firstChild) {
+                    myNode.removeChild(myNode.firstChild);
                 }
             },
 

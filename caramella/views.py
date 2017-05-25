@@ -86,6 +86,15 @@ def cargarLatas(request):
 def remito(request):
     clientes = Cliente.objects.all()
     fecha = time.strftime("%d/%m/%Y")
+    if request.is_ajax():
+        codigo = request.POST.get('codigo')
+        lata = ''
+        try:
+            lata = Lata.objects.get(codigo = codigo, en_stock = True)
+        except:
+            return JsonResponse({'titulo':"Error de lectura",'error':"El codigo ingresado no es reconocido por el sistema"})
+        data = {"lata":{"id":lata.id, "codigo":lata.codigo, "gusto":lata.gusto.nombre, "peso":lata.peso}}
+        return JsonResponse(data)
     return render_to_response('Remito.html', {'clientes':clientes, 'fecha':fecha}, RequestContext(request))
 
 def verStock(request):
