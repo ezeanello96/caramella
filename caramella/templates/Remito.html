@@ -125,6 +125,8 @@
                     if(is_lata == null){
                         var row = table.insertRow(1);
 
+                        var precio = parseFloat($('#precio-kg').val()) * parseFloat(json['lata'].peso);
+
                         row.id = "lata"+json['lata'].id;
                         var cell1 = row.insertCell(0);
                         var cell2 = row.insertCell(1);
@@ -136,15 +138,15 @@
                         cell2.innerHTML = json['lata'].codigo;
                         cell3.innerHTML = json['lata'].gusto;
                         cell4.innerHTML = json['lata'].peso+" Kgs.";
-                        cell5.innerHTML = '<btn class="btn btn-danger" onclick="rmvLata('+json['lata'].id+');"><i class="fa fa-times"></i></btn>';
+                        cell5.innerHTML = '<btn class="btn btn-danger" onclick="rmvLata(this,\''+precio+'\',\''+json['lata'].id+'\');"><i class="fa fa-times"></i></btn>';
                         $( "#codigo" ).val('');
                         $( "#codigo" ).focus();
                         cant = cant + 1;
                         $( "#cant" ).text(cant);
-                        ids.push(json['lata'].id);
-                        var precio = parseFloat($('#precio-kg').val()) * parseFloat(json['lata'].peso);
+                        ids.push(parseInt(json['lata'].id));
                         subtotal = subtotal + precio;
                         $( "#subtotal" ).val(subtotal);
+                        alert(ids);
                     }else{
                         alert("ESTA LATA YA ESTA CARGADA EN EL REMITO, NO PUEDE CARGARLA DOS VECES");
                         $( "#codigo" ).val('');
@@ -164,15 +166,23 @@
         });
     }
 
-    function rmvLata(id) {
-        var r = confirm("De verdad desea eliminar la lata con ID: "+id);
+    function rmvLata(row, precio, id_lata) {
+        var r = confirm("De verdad desea eliminar la lata con ID: "+id_lata);
 
         if (r == true) {
-            var myNode = document.getElementById("lata"+id);
-            while (myNode.firstChild) {
-                myNode.removeChild(myNode.firstChild);
+            var sub = parseFloat($('#subtotal').val());
+            cant = cant - 1;
+            $( "#cant" ).text(cant);
+            sub = sub - precio;
+            $('#subtotal').val(sub);
+            var i = row.parentNode.parentNode.rowIndex;
+            var index = ids.indexOf(parseInt(id_lata));
+            if (index > -1) {
+                ids.splice(index, 1);
             }
-        }else{}
+            document.getElementById("latas").deleteRow(i);
+            $( "#codigo" ).focus();
+        }else{$( "#codigo" ).focus();}
     }
 
     function salir() {
@@ -181,23 +191,22 @@
 
     function guardar() {
         var csrftoken = getCookie('csrftoken');
+        var cliente = $("#selectCliente").val();
+        var sub = $('#subtotal').val();
         $.ajax({
-            url : '/agregar/', // the endpoint,commonly same url
+            url : '/remito/', // the endpoint,commonly same url
             type : "POST", // http method
             data : { csrfmiddlewaretoken : csrftoken, 
-                    id_cliente : $("#selectCliente").val(),
-                    latas : ids,
+                    id_cliente : cliente,
+                    ids : ids,
+                    total : sub,
                    }, // data sent with the post request
 
             // handle a successful response
             success : function(json) {
                 //console.log(json); // another sanity check
                 //On success show the data posted to server as a message
-                alert(json['error']);
-                var myNode = document.getElementById("usuario"+id);
-                while (myNode.firstChild) {
-                    myNode.removeChild(myNode.firstChild);
-                }
+                
             },
 
             // handle a non-successful response

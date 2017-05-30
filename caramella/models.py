@@ -15,6 +15,8 @@ class Grupo(models.Model):
 class Gusto(models.Model):
     nombre = models.CharField("Nombre", max_length=20)
     grupo = models.ForeignKey(Grupo)
+    rna = models.CharField("Nro RNA", max_length=50)
+    rne = models.CharField("Nro RNE", max_length=50)
     activo = models.BooleanField("Gusto activo")
     #ingredientes = models.ManyToManyField(Ingrediente)
     

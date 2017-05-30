@@ -87,14 +87,24 @@ def remito(request):
     clientes = Cliente.objects.all()
     fecha = time.strftime("%d/%m/%Y")
     if request.is_ajax():
-        codigo = request.POST.get('codigo')
-        lata = ''
-        try:
-            lata = Lata.objects.get(codigo = codigo, en_stock = True)
-        except:
-            return JsonResponse({'titulo':"Error de lectura",'error':"El codigo ingresado no es reconocido por el sistema"})
-        data = {"lata":{"id":lata.id, "codigo":lata.codigo, "gusto":lata.gusto.nombre, "peso":lata.peso}}
-        return JsonResponse(data)
+        if "codigo" in request.POST:
+            codigo = request.POST.get('codigo')
+            lata = ''
+            try:
+                lata = Lata.objects.get(codigo = codigo, en_stock = True)
+            except:
+                return JsonResponse({'titulo':"Error de lectura",'error':"El codigo ingresado no es reconocido por el sistema"})
+            data = {"lata":{"id":lata.id, "codigo":lata.codigo, "gusto":lata.gusto.nombre, "peso":lata.peso}}
+            return JsonResponse(data)
+        elif "id_cliente" in request.POST:
+            ids = request.POST.get('ids')
+            print ids
+            latas = []
+            for i in range(len(ids)):
+                lata = Lata.objects.get(id__exact = ids[i])
+                print lata + " " + ids[i]
+                latas.append(lata)
+            return JsonResponse("data")
     return render_to_response('Remito.html', {'clientes':clientes, 'fecha':fecha}, RequestContext(request))
 
 def verStock(request):
@@ -133,3 +143,29 @@ def clientes(request):
             return JsonResponse(data)
     clientes = Cliente.objects.all()
     return render_to_response('clientes.html', {'clientes':clientes}, RequestContext(request))
+
+def stats(request):
+    fechaDesde, fechaHasta = None, None
+    clientes = Cliente.objects.all()
+    resultado = []
+    kilos = 0.0
+    totalKilos = 0.0
+    for i in range(len(clientes)):
+        kilos = 0.0
+        if not request.method == 'POST':
+            remitos = clientes[i].remito_set.all()
+        else:
+            fechaDesde = datetime.datetime.strptime(request.POST['fechaDesde'] + ' 00:00:00', '%Y-%m-%d %H:%M:%S')
+            fechaHasta = datetime.datetime.strptime(request.POST['fechaDesde'] + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
+            remitos = clientes[i].remito_set.filter(fecha__range=[fechaDesde, fechaHasta])
+            fechaDesde = fechaDesde.strftime("%Y-%m-%d")
+            fechaHasta = fechaHasta.strftime("%Y-%m-%d")
+        for j in range(len(remitos)):
+            latas = remitos[j].latas.all()
+            for k in range(len(latas)):
+                kilos += latas[k].peso
+        totalKilos += kilos
+        kilos = ("%.3f" % round(kilos,3))
+        resultado.append({'cliente':clientes[i].razon_social, 'cantidad': kilos})
+    totalKilos = ("%.3f" % round(totalKilos,3))
+    return render_to_response('estadisticas.html', {'resultado':resultado, 'totalKilos':totalKilos, 'fechaDesde':fechaDesde, 'fechaHasta':fechaHasta}, RequestContext(request))
