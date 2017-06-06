@@ -146,7 +146,6 @@
                         ids.push(parseInt(json['lata'].id));
                         subtotal = subtotal + precio;
                         $( "#subtotal" ).val(subtotal);
-                        alert(ids);
                     }else{
                         alert("ESTA LATA YA ESTA CARGADA EN EL REMITO, NO PUEDE CARGARLA DOS VECES");
                         $( "#codigo" ).val('');
@@ -193,12 +192,13 @@
         var csrftoken = getCookie('csrftoken');
         var cliente = $("#selectCliente").val();
         var sub = $('#subtotal').val();
+        alert(ids);
         $.ajax({
             url : '/remito/', // the endpoint,commonly same url
             type : "POST", // http method
             data : { csrfmiddlewaretoken : csrftoken, 
                     id_cliente : cliente,
-                    ids : ids,
+                    'ids[]' : ids,
                     total : sub,
                    }, // data sent with the post request
 

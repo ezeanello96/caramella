@@ -10,7 +10,9 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import datetime
 import time
-import serial
+#Aca importo librerias externas a Django que seran utilizadas en el software
+#import serial
+import xlsxwriter
 import base64
 from subprocess import call    
 
@@ -83,6 +85,50 @@ def cargarLatas(request):
                 return JsonResponse({'titulo':"Error de conexión",'error':"Compruebe que la balanza este encendida y que el cable USB este bien conectado."})
     return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha, 'ultimo_id':ultimo_id}, RequestContext(request))
 
+def hacerEncabezado(cliente, remito, worksheet, fecha):
+    worksheet.set_column('B:B', 45)
+    worksheet.set_column('A:A', 20)
+    worksheet.set_column('C:C', 25)
+    worksheet.set_column('D:D', 40)
+    worksheet.write(0, 1, u"Razón Social:")
+    worksheet.write(0, 2, "Vitali Maria Evangelina")
+    worksheet.write(1, 1, u"Télefono:")
+    worksheet.write(1, 2, "03547-421270")
+    worksheet.write(2, 1, "Fax:")
+    worksheet.write(3, 1, "Cod. Postal:")
+    worksheet.write(3, 2, "5186")
+    worksheet.write(4, 1, "Direccion:")
+    worksheet.write(4, 2, "Lucas V cordoba 281")
+    worksheet.write(0, 3, "CUIT:")
+    worksheet.write(0, 4, "27-6787892-1")
+    worksheet.write(0, 6, "REMITO")
+    nro = Remito.objects.all().count()
+    worksheet.write(1, 6, nro)
+    worksheet.write(2, 6, "Fecha: "+fecha)
+    worksheet.write(6, 0, u"Señor/es:")
+    worksheet.write(7, 0, "Nombre: ")
+    worksheet.write(7, 1, cliente.razon_social)
+    worksheet.write(8, 0, "Domicilio: ")
+    worksheet.write(8, 1, cliente.direccion)
+    worksheet.write(9, 0, "Localidad: ")
+    worksheet.write(9, 1, cliente.localidad)
+    worksheet.write(10, 0, "CUIT: ")
+    worksheet.write(10, 1, cliente.cuit)
+    worksheet.write(7, 3, u"Télefono: ")
+    worksheet.write(7, 4, cliente.telefono)
+    worksheet.write(8, 3, "Provincia: ")
+    worksheet.write(8, 4, u"Córdoba")
+    worksheet.write(12, 0, u"Artículo")
+    worksheet.write(12, 1, u"Descripción")
+    worksheet.write(12, 2, u"Kilos")
+    worksheet.write(12, 3, u"Importe")
+    
+def generarPie(worksheet, total, cant, row, kilos):
+    worksheet.write(row, 0, u"Total")
+    worksheet.write(row, 2, str(kilos))
+    worksheet.write(row, 3, "$"+str(total))
+    worksheet.write(row+1, 0, u"Cantidad total de latas retiradas: "+str(cant))
+    
 def remito(request):
     clientes = Cliente.objects.all()
     fecha = time.strftime("%d/%m/%Y")
@@ -97,14 +143,38 @@ def remito(request):
             data = {"lata":{"id":lata.id, "codigo":lata.codigo, "gusto":lata.gusto.nombre, "peso":lata.peso}}
             return JsonResponse(data)
         elif "id_cliente" in request.POST:
-            ids = request.POST.get('ids')
-            print ids
-            latas = []
+            ids = request.POST.getlist('ids[]')
+            cliente = Cliente.objects.get(id__exact = request.POST.get('id_cliente'))
+            fecha = time.strftime("%Y-%m-%d")
+            remito = Remito.objects.create(cliente = cliente, fecha = fecha)
+            remito.save()
+            archivo = 'media/'+remito.nombreArchivo()
+            workbook = xlsxwriter.Workbook(archivo)
+            worksheet = workbook.add_worksheet()
+            hacerEncabezado(cliente, remito, worksheet, fecha)
+            row = 13
+            col = 0
+            total = 0
+            cant = 0
+            kgs = 0
             for i in range(len(ids)):
                 lata = Lata.objects.get(id__exact = ids[i])
-                print lata + " " + ids[i]
-                latas.append(lata)
-            return JsonResponse("data")
+                #remito.latas.add(lata)
+                worksheet.write(row, col, i+1)
+                worksheet.write(row, col + 1, lata.descripcion())
+                worksheet.write(row, col + 2, str(lata.peso)+" Kgs.")
+                worksheet.write(row, col + 3, "$"+str(lata.sacarPrecio(cliente.precio)))
+                row += 1
+                cant += 1
+                total += lata.sacarPrecio(cliente.precio)
+                kgs += lata.peso
+                #lata.en_stock = False
+                #lata.save()
+                #remito.save()
+            generarPie(worksheet, total, cant, row, kgs)
+            workbook.close()
+            call(["gnumeric",archivo])
+            return JsonResponse({'error':"Remito guardado. Encontrara el archivo en la siguiente ubicacion: ..."})
     return render_to_response('Remito.html', {'clientes':clientes, 'fecha':fecha}, RequestContext(request))
 
 def verStock(request):

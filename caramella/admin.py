@@ -6,3 +6,4 @@ from models import *
 admin.site.register(Grupo)
 admin.site.register(Gusto)
 admin.site.register(Lata)
+admin.site.register(Remito)

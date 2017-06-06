@@ -61,6 +61,13 @@ class Lata(models.Model):
         
     def __unicode__(self):
         return  self.codigo + " - " + str(self.fecha_elab)
+    
+    def sacarPrecio(self, precio_kg):
+        precio = self.peso * float(precio_kg)
+        return precio
+    
+    def descripcion(self):
+        return self.gusto.nombre + " - " + self.codigo
 
 class Remito(models.Model):
     fecha = models.DateField("Fecha")
@@ -74,4 +81,7 @@ class Remito(models.Model):
         ordering = ("fecha","cliente")
         
     def __unicode__(self):
-        return self.fecha + " - " + self.cliente.razon_social
+        return str(self.fecha) + " - " + self.cliente.razon_social
+    
+    def nombreArchivo(self):
+        return str(self.fecha+"-"+self.cliente.razon_social)+".xlsx"
