@@ -73,6 +73,8 @@ class Remito(models.Model):
     fecha = models.DateField("Fecha")
     cliente = models.ForeignKey(Cliente)
     latas = models.ManyToManyField(Lata)
+    pesoTotal = models.FloatField("Peso total")
+    precioTotal = models.FloatField("Precio total ($)")
     archivo = models.FileField("Archivo", upload_to='remitos/')
     
     class Meta:

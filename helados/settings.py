@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+# Configuramos el numero de lote inicial
+
+LOTE = [1,'07/06/2017']
 
 # Application definition
 

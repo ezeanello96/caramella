@@ -10,6 +10,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 import datetime
 import time
+from helados import settings
 #Aca importo librerias externas a Django que seran utilizadas en el software
 #import serial
 import xlsxwriter
@@ -19,14 +20,30 @@ from subprocess import call
 def index(request):
     return render_to_response('index.html', RequestContext(request))
 
+def getLote(date):
+    d1 = datetime.datetime.strptime(date, "%d/%m/%Y")
+    d2 = datetime.datetime.strptime(settings.LOTE[1], "%d/%m/%Y")
+    lote = settings.LOTE[0]+abs((d2 - d1).days)
+    lote = str(lote)
+    if len(lote) == 1:
+        lote = "000"+lote
+    elif len(lote) == 2:
+        lote = "00"+lote
+    elif len(lote) == 3:
+        lote = "0"+lote
+    else:
+        lote = lote
+    return lote
+
 def cargarLatas(request):
+    fecha = time.strftime("%d/%m/%Y")
+    lote = getLote(str(fecha))
     grupos = Grupo.objects.all()
     gru_gus = []
     for i in range(len(grupos)):
         gustos = Gusto.objects.filter(grupo = grupos[i], activo = True)#Agregar aca para que solamente me muestre los gustos activos
         agregar = [grupos[i],gustos]
         gru_gus.append(agregar)
-    fecha = time.strftime("%d/%m/%Y")
     ultimo_id = 0
     try:
         ultimo = Lata.objects.latest('id')
@@ -83,7 +100,7 @@ def cargarLatas(request):
                     return JsonResponse({'titulo':"Espere...",'error':"Espere a que el peso se estabilice sobre la balanza."})
             except:
                 return JsonResponse({'titulo':"Error de conexión",'error':"Compruebe que la balanza este encendida y que el cable USB este bien conectado."})
-    return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha, 'ultimo_id':ultimo_id}, RequestContext(request))
+    return render_to_response('cargarLatas.html', {'grupos':gru_gus, 'fecha':fecha, 'ultimo_id':ultimo_id, 'lote':lote}, RequestContext(request))
 
 def hacerEncabezado(cliente, remito, worksheet, fecha):
     worksheet.set_column('B:B', 45)
@@ -146,9 +163,8 @@ def remito(request):
             ids = request.POST.getlist('ids[]')
             cliente = Cliente.objects.get(id__exact = request.POST.get('id_cliente'))
             fecha = time.strftime("%Y-%m-%d")
-            remito = Remito.objects.create(cliente = cliente, fecha = fecha)
-            remito.save()
-            archivo = 'media/'+remito.nombreArchivo()
+            remito = Remito.objects.create(cliente = cliente, fecha = fecha, pesoTotal = 0.0, precioTotal = 0.0)
+            archivo = 'media/remitos/'+remito.nombreArchivo()
             workbook = xlsxwriter.Workbook(archivo)
             worksheet = workbook.add_worksheet()
             hacerEncabezado(cliente, remito, worksheet, fecha)
@@ -159,7 +175,7 @@ def remito(request):
             kgs = 0
             for i in range(len(ids)):
                 lata = Lata.objects.get(id__exact = ids[i])
-                #remito.latas.add(lata)
+                remito.latas.add(lata)
                 worksheet.write(row, col, i+1)
                 worksheet.write(row, col + 1, lata.descripcion())
                 worksheet.write(row, col + 2, str(lata.peso)+" Kgs.")
@@ -168,17 +184,43 @@ def remito(request):
                 cant += 1
                 total += lata.sacarPrecio(cliente.precio)
                 kgs += lata.peso
-                #lata.en_stock = False
-                #lata.save()
-                #remito.save()
+                lata.en_stock = False
+                lata.save()
             generarPie(worksheet, total, cant, row, kgs)
             workbook.close()
+            print kgs
+            remito.pesoTotal = kgs
+            remito.precioTotal = total
+            remito.save()
             call(["gnumeric",archivo])
             return JsonResponse({'error':"Remito guardado. Encontrara el archivo en la siguiente ubicacion: ..."})
     return render_to_response('Remito.html', {'clientes':clientes, 'fecha':fecha}, RequestContext(request))
 
+def getKilos(latas):
+    totalKilos = 0.0
+    for lata in latas:
+        totalKilos += lata.peso
+    return totalKilos
+    
 def verStock(request):
-    return render_to_response('verStock.html', RequestContext(request))
+    latas = Lata.objects.filter(en_stock = True)
+    gustos = Gusto.objects.filter(activo = True)
+    totalLatas = len(latas)
+    totalKilos = getKilos(latas)
+    if request.method == 'POST':
+        if "porGusto" in request.POST:
+            gusto = Gusto.objects.get(id__exact = request.POST.get('selectGusto'))
+            latas = Lata.objects.filter(en_stock = True, gusto = gusto)
+            totalKilos = getKilos(latas)
+            totalLatas = len(latas)
+            return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'busqueda':"gustos ("+gusto.nombre+")"}, RequestContext(request))
+        elif "porLote" in request.POST:
+            lote = request.POST.get('lote')
+            latas = Lata.objects.filter(en_stock = True, lote = lote)
+            totalKilos = getKilos(latas)
+            totalLatas = len(latas)
+            return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'busqueda':"lote ("+lote+")"}, RequestContext(request))
+    return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos}, RequestContext(request))
 
 def clientes(request):
     if request.is_ajax():
@@ -231,9 +273,7 @@ def stats(request):
             fechaDesde = fechaDesde.strftime("%Y-%m-%d")
             fechaHasta = fechaHasta.strftime("%Y-%m-%d")
         for j in range(len(remitos)):
-            latas = remitos[j].latas.all()
-            for k in range(len(latas)):
-                kilos += latas[k].peso
+            kilos += remitos[j].pesoTotal
         totalKilos += kilos
         kilos = ("%.3f" % round(kilos,3))
         resultado.append({'cliente':clientes[i].razon_social, 'cantidad': kilos})

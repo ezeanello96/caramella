@@ -4,7 +4,7 @@ from helados import settings
 import views
 
 urlpatterns = [
-    url(r'^$', views.index, name='inicio'),
+    url(r'^$', views.cargarLatas, name='cargarLatas'),
     url(r'^cargarLatas/', views.cargarLatas, name='cargarLatas'),
     url(r'^remito/', views.remito, name='remito'),
     url(r'^verStock/', views.verStock, name='verStock'),
