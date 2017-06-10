@@ -49,9 +49,11 @@
                 <option value="none">Seleccione un cliente</option>
                 {% for cliente in clientes %}
                 <option value="{{ cliente.id }}">{{ cliente.razon_social }}</option>
-                <input type="hidden" value="{{ cliente.precio }}" id="precio{{ cliente.id }}">
                 {% endfor %}
             </select>
+            {% for cliente in clientes %}
+            <input type="hidden" value="{{ cliente.precio }}" id="precio{{ cliente.id }}">
+            {% endfor %}
             <label style="margin-top: 10px;">Cantidad de latas cargadas: </label><label id="cant">0</label>
             <label style="margin-top: 10px;">Código de barras (utilice el lector para escanear el código):</label>
             <input type="text" maxlength="20" id="codigo" class="form-control" style="margin: 10px 0px 10px 0px;" onchange="buscar(this.value);" disabled>
@@ -192,7 +194,6 @@
         var csrftoken = getCookie('csrftoken');
         var cliente = $("#selectCliente").val();
         var sub = $('#subtotal').val();
-        alert(ids);
         $.ajax({
             url : '/remito/', // the endpoint,commonly same url
             type : "POST", // http method
@@ -206,7 +207,7 @@
             success : function(json) {
                 //console.log(json); // another sanity check
                 //On success show the data posted to server as a message
-                
+                location.reload();
             },
 
             // handle a non-successful response

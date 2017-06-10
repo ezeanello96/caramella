@@ -164,7 +164,7 @@ def remito(request):
             cliente = Cliente.objects.get(id__exact = request.POST.get('id_cliente'))
             fecha = time.strftime("%Y-%m-%d")
             remito = Remito.objects.create(cliente = cliente, fecha = fecha, pesoTotal = 0.0, precioTotal = 0.0)
-            archivo = 'media/remitos/'+remito.nombreArchivo()
+            archivo = "/home/ezeanello/Documentos/Clientes/"+cliente.razon_social+"/"+remito.nombreArchivo()
             workbook = xlsxwriter.Workbook(archivo)
             worksheet = workbook.add_worksheet()
             hacerEncabezado(cliente, remito, worksheet, fecha)
@@ -191,6 +191,7 @@ def remito(request):
             print kgs
             remito.pesoTotal = kgs
             remito.precioTotal = total
+            remito.archivo = archivo
             remito.save()
             call(["gnumeric",archivo])
             return JsonResponse({'error':"Remito guardado. Encontrara el archivo en la siguiente ubicacion: ..."})
@@ -208,18 +209,28 @@ def verStock(request):
     totalLatas = len(latas)
     totalKilos = getKilos(latas)
     if request.method == 'POST':
-        if "porGusto" in request.POST:
-            gusto = Gusto.objects.get(id__exact = request.POST.get('selectGusto'))
-            latas = Lata.objects.filter(en_stock = True, gusto = gusto)
-            totalKilos = getKilos(latas)
-            totalLatas = len(latas)
-            return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'busqueda':"gustos ("+gusto.nombre+")"}, RequestContext(request))
-        elif "porLote" in request.POST:
-            lote = request.POST.get('lote')
-            latas = Lata.objects.filter(en_stock = True, lote = lote)
-            totalKilos = getKilos(latas)
-            totalLatas = len(latas)
-            return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'busqueda':"lote ("+lote+")"}, RequestContext(request))
+        id_gusto = request.POST.get('selectGusto')
+        lote = request.POST.get('lote')
+        fechaDesde = request.POST['fechaDesde']
+        fechaHasta = request.POST['fechaHasta']
+        busqueda = ""
+        if id_gusto != "none":
+            gusto = Gusto.objects.get(id__exact = id_gusto)
+            latas = latas.filter(gusto = gusto)
+            busqueda = " gusto: "+gusto.nombre
+        if lote != "":
+            latas = latas.filter(lote = lote)
+            busqueda = busqueda+" lote: "+lote
+        if fechaDesde != "" and fechaHasta != "":
+            fechaDesde = datetime.datetime.strptime(fechaDesde + ' 00:00:00', '%Y-%m-%d %H:%M:%S')
+            fechaHasta = datetime.datetime.strptime(fechaHasta + ' 23:59:59', '%Y-%m-%d %H:%M:%S')
+            latas = latas.filter(fecha_elab__range=[fechaDesde, fechaHasta])
+            fechaDesde = fechaDesde.strftime("%Y-%m-%d")
+            fechaHasta = fechaHasta.strftime("%Y-%m-%d")
+            busqueda = busqueda+" desde: "+fechaDesde+" hasta: "+fechaHasta
+        totalKilos = getKilos(latas)
+        totalLatas = len(latas)
+        return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'busqueda':busqueda, 'gusto':id_gusto, 'lote':lote, 'fechaDesde':fechaDesde, 'fechaHasta':fechaHasta}, RequestContext(request))
     return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos}, RequestContext(request))
 
 def clientes(request):
@@ -231,6 +242,8 @@ def clientes(request):
                 precio = float(request.POST.get('precio'))
                 cliente = Cliente.objects.create(razon_social = request.POST.get('razon_social'), cuit = request.POST.get('cuit'), precio = precio, direccion = request.POST.get('dir'), telefono = request.POST.get('tel'), localidad = request.POST.get('local'), activo = True)
                 cliente.save()
+                archivo = "/home/ezeanello/Documentos/Clientes/"+cliente.razon_social
+                call(["mkdir",archivo])
                 data = {'error':"EL cliente se agrego satisfactoriamente", 'cliente':{'id':cliente.id, 'razon_social':cliente.razon_social, 'cuit':cliente.cuit}}
                 return JsonResponse(data)
             return JsonResponse({'error':"No se pudo agregar el cliente por que ya existe uno con esa Razon Social o ese CUIT..."})
@@ -244,6 +257,8 @@ def clientes(request):
             return JsonResponse(data)
         elif "saveCliente" in request.POST:
             cliente = Cliente.objects.get(id__exact = request.POST.get('id'))
+            archivo = "/home/ezeanello/Documentos/Clientes/"+cliente.razon_social
+            call(["rmdir",archivo])
             cliente.razon_social = request.POST.get('razon_social')
             cliente.precio = request.POST.get('precio')
             cliente.direccion = request.POST.get('dir')
@@ -251,6 +266,8 @@ def clientes(request):
             cliente.cuit = request.POST.get('cuit')
             cliente.localidad = request.POST.get('local')
             cliente.save()
+            archivo = "/home/ezeanello/Documentos/Clientes/"+cliente.razon_social
+            call(["mkdir",archivo])
             data = {'error':"Nuevos datos del cliente guardados con exito...", 'cliente':{'id':cliente.id, 'razon_social':cliente.razon_social, 'cuit':cliente.cuit}}
             return JsonResponse(data)
     clientes = Cliente.objects.all()

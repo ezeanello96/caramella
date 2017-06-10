@@ -75,7 +75,7 @@ class Remito(models.Model):
     latas = models.ManyToManyField(Lata)
     pesoTotal = models.FloatField("Peso total")
     precioTotal = models.FloatField("Precio total ($)")
-    archivo = models.FileField("Archivo", upload_to='remitos/')
+    archivo = models.CharField("Archivo", max_length=200)
     
     class Meta:
         verbose_name = 'Remito'
@@ -86,4 +86,4 @@ class Remito(models.Model):
         return str(self.fecha) + " - " + self.cliente.razon_social
     
     def nombreArchivo(self):
-        return str(self.fecha+"-"+self.cliente.razon_social)+".xlsx"
+        return str(self.fecha)+".xlsx"
