@@ -148,8 +148,18 @@ def generarPie(worksheet, total, cant, row, kilos):
     
 def remito(request):
     clientes = Cliente.objects.all()
+    remitos = Remito.objects.all()
     fecha = time.strftime("%d/%m/%Y")
     if request.is_ajax():
+        if "archivo" in request.POST:
+            try:
+                archivo = request.POST.get('archivo')
+                if archivo == "":
+                    return JsonResponse({'error':"Error de archivo: El archivo puede haber sido borrado o movido a otra carpeta..."})
+                else:
+                    call(["gnumeric",archivo])
+            except:
+                return JsonResponse({'error':"Error de archivo: El archivo puede haber sido borrado o movido a otra carpeta..."})
         if "codigo" in request.POST:
             codigo = request.POST.get('codigo')
             lata = ''
@@ -195,7 +205,7 @@ def remito(request):
             remito.save()
             call(["gnumeric",archivo])
             return JsonResponse({'error':"Remito guardado. Encontrara el archivo en la siguiente ubicacion: ..."})
-    return render_to_response('Remito.html', {'clientes':clientes, 'fecha':fecha}, RequestContext(request))
+    return render_to_response('Remito.html', {'clientes':clientes, 'fecha':fecha, 'remitos':remitos}, RequestContext(request))
 
 def getKilos(latas):
     totalKilos = 0.0
@@ -209,6 +219,12 @@ def verStock(request):
     totalLatas = len(latas)
     totalKilos = getKilos(latas)
     if request.method == 'POST':
+        if request.is_ajax():
+            if "eliminar" in request.POST:
+                id_lata = request.POST.get('eliminar')
+                lata = Lata.objects.get(id__exact = id_lata)
+                lata.delete()
+                return JsonResponse({'error':"Lata eliminada con exito del sistema"})
         id_gusto = request.POST.get('selectGusto')
         lote = request.POST.get('lote')
         fechaDesde = request.POST['fechaDesde']

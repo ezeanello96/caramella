@@ -3,6 +3,33 @@
 <script type="text/javascript">
     $(document).ready(function() {
         $(".select2").select2();
+        $('#remitos').DataTable( {
+            "order": [0, 'asc'],
+            "language": {
+                "sProcessing":     "Procesando...",
+                "sLengthMenu":     "Mostrar _MENU_ registros",
+                "sZeroRecords":    "No se encontraron resultados",
+                "sEmptyTable":     "Ningun lata cargada en el programa",
+                "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                "sInfoPostFix":    "",
+                "sSearch":         "Buscar:",
+                "sUrl":            "",
+                "sInfoThousands":  ",",
+                "sLoadingRecords": "Cargando...",
+                "oPaginate": {
+                    "sFirst":    "Primero",
+                    "sLast":     "Último",
+                    "sNext":     "Siguiente",
+                    "sPrevious": "Anterior"
+                },
+                "oAria": {
+                    "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
+                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+                }
+            }
+        });
     });
 </script>
 <div id="myModal" class="modal fade">
@@ -40,7 +67,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="col-lg-6" style="margin-top: 20px;">
+        <div class="col-lg-6" style="margin-top: 20px; margin-bottom: 20px;">
             <h4 id="sabor"></h4>
             <label>Fecha de Remito:</label>
             <input type="text" id="fecha" class="form-control" disabled style="margin: 10px 0px 10px 0px;" value="{{ fecha }}">
@@ -72,6 +99,36 @@
                 </div>
             </div>
             <btn class="btn btn-success imprimir" onclick="guardar();">Guardar Remito</btn>
+        </div>
+    </div>
+    <div class="col-lg-2"></div>
+    <div class="col-lg-9 principal" style="margin-top: 30px;">
+        <div class="col-lg-12" style="margin-top: 25px;">
+            <table id="remitos" class="display" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID<th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Latas</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for remito in remitos %}
+                    <tr>
+                        <td>{{ remito.id }}</td>
+                        <td></td>
+                        <td>{{ remito.cliente.razon_social }}</td>
+                        <td>{{ remito.fecha }}</td>
+                        <td>${{ remito.precioTotal }}</td>
+                        <td>{{ remito.latas.count }}</td>
+                        <td><btn class="btn btn-success" onclick="abrir('{{ remito.archivo }}');">Ver</btn></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </body>
@@ -208,6 +265,33 @@
                 //console.log(json); // another sanity check
                 //On success show the data posted to server as a message
                 location.reload();
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    }
+    
+    function abrir(urlArchivo) {
+        var csrftoken = getCookie('csrftoken');
+        $.ajax({
+            url : '/remito/', // the endpoint,commonly same url
+            type : "POST", // http method
+            data : { csrfmiddlewaretoken : csrftoken, 
+                    archivo : urlArchivo,
+                   }, // data sent with the post request
+
+            // handle a successful response
+            success : function(json) {
+                //console.log(json); // another sanity check
+                //On success show the data posted to server as a message
+                if(json['error']){
+                    alert(json['error']);
+                }else{
+                    alert("Abriendo archivo...");
+                }
             },
 
             // handle a non-successful response

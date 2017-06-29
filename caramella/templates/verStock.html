@@ -97,11 +97,12 @@
                             <th>Lote</th>
                             <th>Peso</th>
                             <th>Fecha de elaboración</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for lata in latas %}
-                        <tr>
+                        <tr id="{{ lata.id }}">
                             <td>{{ lata.id }}</td>
                             <td></td>
                             <td>{{ lata.codigo }}</td>
@@ -109,6 +110,7 @@
                             <td>{{ lata.lote }}</td>
                             <td>{{ lata.peso }} Kgs.</td>
                             <td>{{ lata.fecha_elab }}</td>
+                            <td><btn class="btn btn-danger" onclick="eliminarLata({{ lata.id }});">Eliminar</btn></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -117,3 +119,36 @@
         </div>
     </body>
 </html>
+{% csrf_token %}
+<script>
+    function eliminarLata(id_lata){
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+        var r = confirm("De verdad desea eliminar la lata con ID: "+id_lata);
+
+        if (r == true) {
+            $.ajax({
+                url : '/verStock/', // the endpoint,commonly same url
+                type : "POST", // http method
+                data : { csrfmiddlewaretoken : csrftoken, 
+                        eliminar : id_lata,
+                       }, // data sent with the post request
+
+                // handle a successful response
+                success : function(json) {
+                    //console.log(json); // another sanity check
+                    //On success show the data posted to server as a message
+                    if(json['error']){
+                        alert(json['error']);
+                        $('#'+id_lata).remove();
+                    }
+                    
+                },
+
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        }else{}
+    }
+</script>
