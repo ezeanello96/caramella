@@ -67,7 +67,7 @@ class Lata(models.Model):
         return precio
     
     def descripcion(self):
-        return self.gusto.nombre + " - " + self.codigo
+        return str(self.gusto.nombre) + " - " + str(self.codigo)
 
 class Remito(models.Model):
     fecha = models.DateField("Fecha")

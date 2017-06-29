@@ -3,6 +3,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $(".select2").select2();
+            $("#selectEstado").val("{{ estado }}");
             $('#latas').DataTable( {
                 "order": [0, 'asc'],
                 "language": {
@@ -41,14 +42,14 @@
                 {% if not busqueda %}
                 <div class="col-lg-12" style="text-align:center;">
                     <div class="col-lg-6">
-                        <h3>Cantidad de kilos en stock: {{ totalKilos }} Kgs.</h3>
+                        <h3>Cantidad de kilos en sistema: {{ totalKilos }} Kgs.</h3>
                     </div>
                     <div class="col-lg-6">
-                        <h3>Cantidad total de latas en stock: {{ totalLatas }}</h3>
+                        <h3>Cantidad total de latas en sistema: {{ totalLatas }}</h3>
                     </div>
                 </div>
                 {% else %}
-                <h3>Filtrando por {{ busqueda }}</h3>
+                <h3>{{ busqueda }}</h3>
                 <div class="col-lg-12" style="text-align:center;">
                     <div class="col-lg-6">
                         <h3>Cantidad de kilos del filtrado: {{ totalKilos }} Kgs.</h3>
@@ -61,7 +62,7 @@
                 <div class="col-lg-12" style="text-align:center; margin-top: 20px;">
                     <form method="post" class="form-inline">{% csrf_token %}
                         <div class="col-lg-6">
-                            <label>Filtrar por gustos:</label>
+                            <label>Filtrar por gustos:</label><br>
                             <select class="select2 form-control" name="selectGusto">
                                 <option value="none">Seleccione un gusto</option>
                                 {% for gusto in gustos %}
@@ -69,9 +70,17 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-3">
                             <label>Filtrar por lote:</label>
                             <input type="text" name="lote" class="form-control">
+                        </div>
+                        <div class="col-lg-3">
+                            <label>Filtrar por estado:</label>
+                            <select class="form-control" name="selectEstado" id="selectEstado">
+                                <option selected value="all">Todas</option>
+                                <option value="en_stock">En stock</option>
+                                <option value="no_stock">Producidas</option>
+                            </select>
                         </div>
                         <div class="col-lg-12" style="text-align:center; margin-top: 25px;">
                             <div class="col-lg-5 input-group">
@@ -82,11 +91,16 @@
                                 <label>Hasta:</label>
                                 <input type="date" name="fechaHasta" class="form-control" {% if fechaDesde %}value="{{ fechaHasta }}"{% endif %}>
                             </div>
-                            <button type="submit" name="filtros" class="btn btn-success" style="margin-top:25px;">Aplicar filtros</button>
                         </div>
-                    </form>
+                        </div>
                 </div>
-            </div>
+                <div class="col-lg-12">
+                    <center>
+                        <div class="col-lg-6"><btn class="btn btn-primary" style="margin-top: 25px; width: 300px; font-size: 20px;" onclick="exportar();"><b>Exportar filtrado</b></btn></div>
+                        <div class="col-lg-6"><button type="submit" name="filtros" class="btn btn-success" style="margin-top: 25px; width: 300px; font-size: 20px;">Aplicar filtros</button></div>
+                    </center>
+                </div>
+                </form>
             <div class="col-lg-12" style="margin-top: 25px;">
                 <table id="latas" class="display" cellspacing="0" style="margin-top: 15px;">
                     <thead>
@@ -97,6 +111,7 @@
                             <th>Lote</th>
                             <th>Peso</th>
                             <th>Fecha de elaboración</th>
+                            <th>Estado</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -110,7 +125,8 @@
                             <td>{{ lata.lote }}</td>
                             <td>{{ lata.peso }} Kgs.</td>
                             <td>{{ lata.fecha_elab }}</td>
-                            <td><btn class="btn btn-danger" onclick="eliminarLata({{ lata.id }});">Eliminar</btn></td>
+                            <td>{% if lata.en_stock == True %}Disponible{% else %}Vendida{% endif %}</td>
+                            <td><a class="btn btn-warning" target="_blank" href="http://127.0.0.1:8000/admin/caramella/lata/{{ lata.id }}/">Ver</a> <btn class="btn btn-danger" onclick="eliminarLata({{ lata.id }});">Eliminar</btn></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -121,6 +137,34 @@
 </html>
 {% csrf_token %}
 <script>
+    function exportar(){
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        var ids = {{ ids }};
+
+    $.ajax({
+        url : '/verStock/', // the endpoint,commonly same url
+        type : "POST", // http method
+        data : { csrfmiddlewaretoken : csrftoken,
+                export : "Exportar filtrado",
+                'ids[]': ids,
+                busqueda : "{{ busqueda }}",
+               }, // data sent with the post request
+
+        // handle a successful response
+        success : function(json) {
+            //console.log(json); // another sanity check
+            //On success show the data posted to server as a message
+            alert(json['error']);
+        },
+
+        // handle a non-successful response
+        error : function(xhr,errmsg,err) {
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+    });
+    }
+
     function eliminarLata(id_lata){
         var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
         var r = confirm("De verdad desea eliminar la lata con ID: "+id_lata);
@@ -141,7 +185,7 @@
                         alert(json['error']);
                         $('#'+id_lata).remove();
                     }
-                    
+
                 },
 
                 // handle a non-successful response

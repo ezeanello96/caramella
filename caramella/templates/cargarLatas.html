@@ -63,9 +63,9 @@
         </div>
     </div>
     <div class="col-lg-12 etiqueta" id="etiqueta">
+        <label id="label_gusto" style="font-size:18px;">Gusto:</label><br>
         <div class="col-lg-6">
             <label id="label_lote">Lote:</label><br>
-            <label id="label_gusto">Gusto:</label><br>
             <label id="label_rna">RNA:</label>
         </div>
         <div class="col-lg-6">
@@ -73,7 +73,7 @@
             <label id="label_fecha">Fecha:</label><br>
             <label id="label_rne">RNE:</label>
         </div>
-        <img style="margin-top:20px;" id="barcode"/>
+        <img style="margin-top:5px;" id="barcode"/>
     </div>
 </body>
 <script>
@@ -160,8 +160,8 @@
             JsBarcode("#barcode", $('#codigo').val(), {
                 format: "code39",
                 lineColor: "#000",
-                width:1.5,
-                height:80,
+                width:1.6,
+                height:60,
                 displayValue: true
             });
             $('#label_fecha').text('Fecha: '+$('#fecha').val());
@@ -211,8 +211,6 @@
 
                 }
             });
-
-
         }else{
             if($('#codigo').val() == 'Aqui aparecera el codigo...'){
                 $('#titulo-modal').text("Error generando código de barras");

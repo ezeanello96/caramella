@@ -214,26 +214,64 @@ def getKilos(latas):
     return totalKilos
     
 def verStock(request):
-    latas = Lata.objects.filter(en_stock = True)
+    latas = Lata.objects.filter()
     gustos = Gusto.objects.filter(activo = True)
     totalLatas = len(latas)
     totalKilos = getKilos(latas)
     if request.method == 'POST':
+        latas = Lata.objects.filter()
         if request.is_ajax():
             if "eliminar" in request.POST:
                 id_lata = request.POST.get('eliminar')
                 lata = Lata.objects.get(id__exact = id_lata)
                 lata.delete()
                 return JsonResponse({'error':"Lata eliminada con exito del sistema"})
+            elif "export" in request.POST:
+                latas = request.POST.getlist('ids[]')
+                busqueda = request.POST.get('busqueda')
+                archivo = "/home/ezeanello/Documentos/filtrado.xlsx"
+                workbook = xlsxwriter.Workbook(archivo)
+                worksheet = workbook.add_worksheet()
+                worksheet.set_column('B:B', 40)
+                worksheet.set_column('A:A', 25)
+                worksheet.set_column('C:C', 25)
+                worksheet.write(0, 1, busqueda)
+                fecha = time.strftime("%d/%m/%Y")
+                worksheet.write(0, 0, "Fecha: "+fecha)
+                worksheet.write(1, 0, "Nro")
+                worksheet.write(1, 1, u"Descripción")
+                worksheet.write(1, 2, "Peso")
+                row = 2
+                kgs = 0
+                cant = 0
+                for i in range(len(latas)):
+                    lata = Lata.objects.get(id__exact = latas[i])
+                    worksheet.write(row, 0, i+1)
+                    worksheet.write(row, 1, lata.gusto.nombre)
+                    worksheet.write(row, 2, str(lata.peso)+"Kgs.")
+                    row += 1
+                    cant += 1
+                    kgs += lata.peso
+                worksheet.write(row, 0, "Cant. latas: "+str(cant))
+                worksheet.write(row, 1, "Peso total: "+str(kgs)+"Kgs.")
+                workbook.close()
+                return JsonResponse({'error':"Archivo creado con exito en la ubicacion: "+archivo})
         id_gusto = request.POST.get('selectGusto')
         lote = request.POST.get('lote')
         fechaDesde = request.POST['fechaDesde']
         fechaHasta = request.POST['fechaHasta']
-        busqueda = ""
+        busqueda = "Filtrando por: "
+        estado = request.POST.get('selectEstado')
+        if estado == "en_stock":
+            latas = latas.filter(en_stock = True)
+            busqueda = busqueda+" estado: En stock"
+        if estado == "no_stock":
+            latas = latas.filter(en_stock = False)
+            busqueda = busqueda+" estado: Producidas"
         if id_gusto != "none":
             gusto = Gusto.objects.get(id__exact = id_gusto)
             latas = latas.filter(gusto = gusto)
-            busqueda = " gusto: "+gusto.nombre
+            busqueda = busqueda+" gusto: "+gusto.nombre
         if lote != "":
             latas = latas.filter(lote = lote)
             busqueda = busqueda+" lote: "+lote
@@ -246,8 +284,16 @@ def verStock(request):
             busqueda = busqueda+" desde: "+fechaDesde+" hasta: "+fechaHasta
         totalKilos = getKilos(latas)
         totalLatas = len(latas)
-        return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'busqueda':busqueda, 'gusto':id_gusto, 'lote':lote, 'fechaDesde':fechaDesde, 'fechaHasta':fechaHasta}, RequestContext(request))
-    return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos}, RequestContext(request))
+        if busqueda == "Filtrado por: ":
+            busqueda = "Filtrado por: Todas las latas"
+        ids = []
+        for i in range(len(latas)):
+            ids.append(int(latas[i].id))
+        return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'busqueda':busqueda, 'gusto':id_gusto, 'lote':lote, 'fechaDesde':fechaDesde, 'fechaHasta':fechaHasta, 'estado':estado, 'ids':ids}, RequestContext(request))
+    ids = []
+    for i in range(len(latas)):
+        ids.append(int(latas[i].id))
+    return render_to_response('verStock.html', {'latas':latas, 'totalLatas':totalLatas, 'totalKilos':totalKilos, 'gustos':gustos, 'ids':ids, 'estado':"all", 'busqueda':"Filtrado por: Todas las latas"}, RequestContext(request))
 
 def clientes(request):
     if request.is_ajax():
